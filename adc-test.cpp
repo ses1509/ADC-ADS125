@@ -6,6 +6,9 @@ i2cInterfaceClass *i2cobj[8];
 #define FULLBUS 1
 char test_addr[] = {0x48, 0x49, 0x4a, 0x4b};
 
+
+FILE *fp;
+
 int main()
 {
 	seteuid(0);
@@ -20,7 +23,14 @@ int main()
 		i2cobj[4+i]->setupI2CInterface();
 #endif
 	}
-
+	
+	fp = fopen("adc-test.log", O_RDWR|O_CREAT);
+	if(fp < 0)
+	{
+		printf("FILE NOT OPEN \n");
+		perror("");
+		exit(0);
+	}
 	while(1)
 	{
 #if FULLBUS
@@ -31,15 +41,16 @@ int main()
 			adc_val[2*i]= i2cobj[i]->readADC_Differential_0_1();
 			adc_val[2*i+1] = i2cobj[i]->readADC_Differential_2_3();
 			if(i==1 && i==5){
-				printf(" ch[%d]:%f ch[%d]:%f ", 2*i, adc_val[2*i] * 12,  2*i+1, adc_val[2*i +1] * 12 );
+				fprintf(fp, " ch[%d]:%f ch[%d]:%f ", 2*i, adc_val[2*i] * 12,  2*i+1, adc_val[2*i +1] * 12 );
 			}
 			else{
-				printf(" ch[%d]:%f ch[%d]:%f ", 2*i, adc_val[2*i] * 7,  2*i+1, adc_val[2*i +1] *7 );
+				fprintf(fp," ch[%d]:%f ch[%d]:%f ", 2*i, adc_val[2*i] * 7,  2*i+1, adc_val[2*i +1] *7 );
 			}
 			//printf(" press any key..!!\n");
 			//getchar();
 		}
-		printf("\n");
+		fprintf(fp, "\n");
+		fflush(fp);
 		sleep(1);
 
 	}

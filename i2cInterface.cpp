@@ -24,10 +24,10 @@ int i2cInterfaceClass::setupI2CInterface()
 	
 	const char *device ;
 	if(m_i2cBus==1){
-		device = "/dev/i2c-0" ;
+		device = "/dev/i2c-19" ;
 	}
 	else{
-		device = "/dev/i2c-1" ;
+		device = "/dev/i2c-20" ;
 	}
 	if ((m_i2cFd = open(device, O_RDWR)) < 0)
 	{
@@ -63,6 +63,7 @@ int i2cInterfaceClass::setupI2CInterface()
 	// begin conversion
 	if (write(m_i2cFd, writeBuf, 3) != 3) {
 		printf(" conversion -module -error @ %s:%d \n", __FUNCTION__, __LINE__);
+		m_i2cFd = -1;
 		return FAILURE;
 	}
 	else{
@@ -93,6 +94,11 @@ float i2cInterfaceClass::readADC_Differential_0_1()
 	writeBuf[0] = ADS1015_REG_POINTER_CONFIG;
 	writeBuf[1] = config>>8;
 	writeBuf[2] = config & 0x00ff;
+
+	if(m_i2cFd <0)
+	{
+		return;
+	}
 	
 	// begin conversion
 	if (write(m_i2cFd, writeBuf, 3) != 3) {
@@ -151,6 +157,10 @@ float i2cInterfaceClass::readADC_Differential_2_3()
 	uint8_t writeBuf[3];
 	uint8_t readBuf[2];
 	
+	if(m_i2cFd <0)
+	{
+		return;
+	}
 	writeBuf[0] = ADS1015_REG_POINTER_CONFIG;
 	writeBuf[1] = config>>8;
 	writeBuf[2] = config & 0x00ff;
